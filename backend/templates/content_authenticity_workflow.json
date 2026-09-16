@@ -1,0 +1,125 @@
+{
+  "id": "content_authenticity_v1",
+  "name": "Content Authenticity Verification",
+  "description": "Verify authenticity of submitted poems/content using OCR, similarity matching, AI detection, and human review",
+  "version": "1.0.0",
+  "use_case": "uc1_content_authenticity",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "name": "Start",
+      "config": {}
+    },
+    {
+      "id": "entra_id_guard",
+      "type": "agent",
+      "name": "Entra ID + Guardrails",
+      "config": {
+        "agent_type": "authentication",
+        "output_key": "auth_result"
+      }
+    },
+    {
+      "id": "ocr_extraction",
+      "type": "agent",
+      "name": "OCR Extraction (Preserve Diacritics)",
+      "config": {
+        "agent_type": "ocr",
+        "input_key": "input",
+        "preserve_diacritics": true,
+        "quality_threshold": 0.85,
+        "use_vision_llm": true,
+        "output_key": "ocr_output"
+      }
+    },
+    {
+      "id": "similarity_check",
+      "type": "agent",
+      "name": "Similarity Matching (Textual/Semantic/Structural/Stylistic)",
+      "config": {
+        "agent_type": "similarity",
+        "input_key": "ocr_output",
+        "corpus_key": "poem_corpus",
+        "top_k": 10,
+        "similarity_types": ["semantic", "textual", "structural", "stylistic"],
+        "output_key": "similarity_output"
+      }
+    },
+    {
+      "id": "ai_detection",
+      "type": "agent",
+      "name": "AI-Generated Content Detection",
+      "config": {
+        "agent_type": "ai_detection",
+        "input_key": "similarity_output",
+        "detection_model": "llama3.2:3b",
+        "output_key": "ai_detection_output"
+      }
+    },
+    {
+      "id": "scoring",
+      "type": "agent",
+      "name": "Scoring with Confidence",
+      "config": {
+        "agent_type": "scoring",
+        "input_key": "ai_detection_output",
+        "criteria": ["authenticity", "originality", "quality"],
+        "scoring_model": "llama3.2:3b",
+        "output_key": "scoring_output"
+      }
+    },
+    {
+      "id": "confidence_gate",
+      "type": "condition",
+      "name": "Confidence Gate",
+      "config": {
+        "condition": "scoring_output.confidence >= 0.8"
+      }
+    },
+    {
+      "id": "auto_approve",
+      "type": "data_transform",
+      "name": "Auto-Approve (High Confidence)",
+      "config": {
+        "transform_type": "extract",
+        "input_key": "scoring_output",
+        "output_key": "final_result",
+        "fields": ["overall_score", "confidence"]
+      }
+    },
+    {
+      "id": "human_review",
+      "type": "human_in_loop",
+      "name": "Human Judge Review",
+      "config": {
+        "prompt": "Review this submission for authenticity",
+        "required_fields": ["decision", "notes"],
+        "output_key": "human_decision"
+      }
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "name": "End",
+      "config": {}
+    }
+  ],
+  "edges": [
+    {"source": "start", "target": "entra_id_guard"},
+    {"source": "entra_id_guard", "target": "ocr_extraction"},
+    {"source": "ocr_extraction", "target": "similarity_check"},
+    {"source": "similarity_check", "target": "ai_detection"},
+    {"source": "ai_detection", "target": "scoring"},
+    {"source": "scoring", "target": "confidence_gate"},
+    {"source": "confidence_gate", "target": "auto_approve", "condition": "true"},
+    {"source": "confidence_gate", "target": "human_review", "condition": "false"},
+    {"source": "auto_approve", "target": "end"},
+    {"source": "human_review", "target": "end"}
+  ],
+  "metadata": {
+    "created_by": "system",
+    "category": "content_verification",
+    "required_corpus": "50k_poems"
+  }
+}

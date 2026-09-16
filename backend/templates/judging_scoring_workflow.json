@@ -1,0 +1,116 @@
+{
+  "id": "judging_scoring_v1",
+  "name": "Judging and Scoring System",
+  "description": "Multi-agent judging workflow with rubric evaluation, benchmarking, recommendations, and panel consistency reporting",
+  "version": "1.0.0",
+  "use_case": "uc2_judging_scoring",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "name": "Start",
+      "config": {}
+    },
+    {
+      "id": "entra_id_guard",
+      "type": "agent",
+      "name": "Entra ID + Guardrails",
+      "config": {
+        "agent_type": "authentication",
+        "output_key": "auth_result"
+      }
+    },
+    {
+      "id": "rubric_evaluation",
+      "type": "agent",
+      "name": "Rubric-Based Evaluation",
+      "config": {
+        "agent_type": "rubric",
+        "input_key": "input",
+        "rubric": {
+          "vocabulary": {"weight": 0.25, "criteria": "Appropriate heritage vocabulary and terminology"},
+          "structure": {"weight": 0.25, "criteria": "Adherence to traditional forms and structure"},
+          "heritage_authenticity": {"weight": 0.30, "criteria": "Alignment with cultural heritage values"},
+          "creativity": {"weight": 0.20, "criteria": "Original and creative expression"}
+        },
+        "industry": "cultural_heritage",
+        "output_key": "rubric_output"
+      }
+    },
+    {
+      "id": "benchmarking",
+      "type": "agent",
+      "name": "Benchmark vs Current + Past Entries",
+      "config": {
+        "agent_type": "benchmarking",
+        "input_key": "rubric_output",
+        "historical_data_key": "past_competitions",
+        "comparison_metrics": ["weighted_score"],
+        "output_key": "benchmark_output"
+      }
+    },
+    {
+      "id": "recommendation",
+      "type": "agent",
+      "name": "Generate Recommendation + Rationale",
+      "config": {
+        "agent_type": "recommendation",
+        "include_rationale": true,
+        "output_key": "recommendation_output"
+      }
+    },
+    {
+      "id": "judge_commentary",
+      "type": "agent",
+      "name": "Judge Commentary Generation",
+      "config": {
+        "agent_type": "commentary",
+        "input_key": "recommendation_output",
+        "output_key": "commentary_output"
+      }
+    },
+    {
+      "id": "panel_consistency",
+      "type": "agent",
+      "name": "Panel Consistency & Reporting",
+      "config": {
+        "agent_type": "panel_analysis",
+        "analyze_inter_judge_agreement": true,
+        "flag_outliers": true,
+        "score_distribution_by_category": true,
+        "output_key": "panel_report"
+      }
+    },
+    {
+      "id": "human_finalization",
+      "type": "human_in_loop",
+      "name": "Human Judges Finalize Scores",
+      "config": {
+        "prompt": "Review AI recommendations and finalize scores",
+        "required_fields": ["final_scores", "comments"],
+        "output_key": "final_decision"
+      }
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "name": "End",
+      "config": {}
+    }
+  ],
+  "edges": [
+    {"source": "start", "target": "entra_id_guard"},
+    {"source": "entra_id_guard", "target": "rubric_evaluation"},
+    {"source": "rubric_evaluation", "target": "benchmarking"},
+    {"source": "benchmarking", "target": "recommendation"},
+    {"source": "recommendation", "target": "judge_commentary"},
+    {"source": "judge_commentary", "target": "panel_consistency"},
+    {"source": "panel_consistency", "target": "human_finalization"},
+    {"source": "human_finalization", "target": "end"}
+  ],
+  "metadata": {
+    "created_by": "system",
+    "category": "judging_scoring",
+    "supports_multi_judge": true
+  }
+}
