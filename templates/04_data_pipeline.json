@@ -1,0 +1,176 @@
+{
+  "id": "data_pipeline_004",
+  "name": "Data Pipeline Workflow",
+  "description": "ETL pipeline demonstrating data extraction, transformation with LLM, and export to structured formats. Processes raw data through AI-powered transformation and outputs to JSON/CSV.",
+  "category": "Data Processing",
+  "difficulty": "Intermediate",
+  "tags": ["etl", "data-pipeline", "transformation", "export", "llm"],
+  "author": "Agentic Workflow Builder",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "data_input",
+      "type": "text_input",
+      "data": {
+        "label": "Raw Data Input",
+        "nodeType": "text_input",
+        "category": "Input"
+      },
+      "position": { "x": 100, "y": 200 }
+    },
+    {
+      "id": "cache_check",
+      "type": "cache_get",
+      "data": {
+        "label": "Check Processed Cache",
+        "nodeType": "cache_get",
+        "category": "Memory",
+        "config": {
+          "key": "processed_{{data_input.hash}}"
+        }
+      },
+      "position": { "x": 300, "y": 200 }
+    },
+    {
+      "id": "if_cached",
+      "type": "if_else",
+      "data": {
+        "label": "Already Processed?",
+        "nodeType": "if_else",
+        "category": "Control Flow",
+        "config": {
+          "condition": "cache_check.success === true"
+        }
+      },
+      "position": { "x": 500, "y": 200 }
+    },
+    {
+      "id": "llm_transform",
+      "type": "ollama_llm",
+      "data": {
+        "label": "AI Data Transformation",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a data transformation assistant. Extract structured data from the input and format it as JSON. Include fields: id, name, category, value, timestamp. Be concise and accurate.",
+          "temperature": 0.1,
+          "maxTokens": 500
+        }
+      },
+      "position": { "x": 700, "y": 300 }
+    },
+    {
+      "id": "validate_json",
+      "type": "python_code",
+      "data": {
+        "label": "Validate & Format JSON",
+        "nodeType": "python_code",
+        "category": "Data Transform",
+        "config": {
+          "code": "import json\\ntry:\\n    data = json.loads({{llm_transform.response}})\\n    result = json.dumps(data, indent=2)\\n    status = 'valid'\\nexcept:\\n    result = '{}'\\n    status = 'invalid'"
+        }
+      },
+      "position": { "x": 900, "y": 300 }
+    },
+    {
+      "id": "cache_result",
+      "type": "cache_set",
+      "data": {
+        "label": "Cache Transformed Data",
+        "nodeType": "cache_set",
+        "category": "Memory",
+        "config": {
+          "key": "processed_{{data_input.hash}}",
+          "value": "{{validate_json.result}}",
+          "ttl": 7200
+        }
+      },
+      "position": { "x": 1100, "y": 300 }
+    },
+    {
+      "id": "export_json",
+      "type": "file_write",
+      "data": {
+        "label": "Export to JSON",
+        "nodeType": "file_write",
+        "category": "Output",
+        "config": {
+          "filename": "output_{{timestamp}}.json",
+          "content": "{{validate_json.result}}",
+          "format": "json"
+        }
+      },
+      "position": { "x": 1300, "y": 250 }
+    },
+    {
+      "id": "export_csv",
+      "type": "file_write",
+      "data": {
+        "label": "Export to CSV (Optional)",
+        "nodeType": "file_write",
+        "category": "Output",
+        "config": {
+          "filename": "output_{{timestamp}}.csv",
+          "content": "{{validate_json.csv}}",
+          "format": "csv"
+        }
+      },
+      "position": { "x": 1300, "y": 350 }
+    },
+    {
+      "id": "success_display",
+      "type": "display",
+      "data": {
+        "label": "Pipeline Complete",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "✅ Data Pipeline Complete!\\n\\nProcessed Records: {{validate_json.count}}\\nStatus: {{validate_json.status}}\\nOutput: {{export_json.path}}\\n\\nTransformed Data:\\n{{validate_json.result}}"
+        }
+      },
+      "position": { "x": 1500, "y": 300 }
+    },
+    {
+      "id": "cached_display",
+      "type": "display",
+      "data": {
+        "label": "Retrieved from Cache",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "⚡ Retrieved from cache (no processing needed)\\n\\nCached Data:\\n{{cache_check.value}}"
+        }
+      },
+      "position": { "x": 700, "y": 100 }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "data_input", "target": "cache_check" },
+    { "id": "e2", "source": "cache_check", "target": "if_cached" },
+    { "id": "e3", "source": "if_cached", "target": "cached_display", "sourceHandle": "true" },
+    { "id": "e4", "source": "if_cached", "target": "llm_transform", "sourceHandle": "false" },
+    { "id": "e5", "source": "llm_transform", "target": "validate_json" },
+    { "id": "e6", "source": "validate_json", "target": "cache_result" },
+    { "id": "e7", "source": "cache_result", "target": "export_json" },
+    { "id": "e8", "source": "cache_result", "target": "export_csv" },
+    { "id": "e9", "source": "export_json", "target": "success_display" },
+    { "id": "e10", "source": "export_csv", "target": "success_display" }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-12",
+    "estimatedRuntime": "5-15 seconds per batch",
+    "requirements": [
+      "Ollama with llama3.2:3b model",
+      "File system write permissions"
+    ],
+    "useCases": [
+      "ETL pipelines for data warehousing",
+      "API response transformation",
+      "Log file parsing and structuring",
+      "Data migration and format conversion",
+      "Automated data quality checks"
+    ],
+    "notes": "This template demonstrates a complete ETL workflow: Extract (input), Transform (LLM + validation), Load (export). Includes intelligent caching to avoid reprocessing the same data. Perfect for batch data processing scenarios."
+  }
+}

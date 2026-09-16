@@ -1,0 +1,38 @@
+{
+  "name": "Email Notification Workflow",
+  "description": "Simple email notification workflow template",
+  "category": "notifications",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "trigger",
+      "name": "Workflow Start",
+      "config": {},
+      "next_nodes": ["transform"]
+    },
+    {
+      "id": "transform",
+      "type": "data_transform",
+      "name": "Prepare Email Data",
+      "config": {
+        "transformation": "Format data for email"
+      },
+      "next_nodes": ["email"]
+    },
+    {
+      "id": "email",
+      "type": "email_agent",
+      "name": "Send Email",
+      "config": {
+        "to_email": "user@example.com",
+        "subject": "Workflow Notification",
+        "body": "Your workflow has completed successfully."
+      },
+      "next_nodes": []
+    }
+  ],
+  "edges": [
+    {"id": "e1", "source": "start", "target": "transform"},
+    {"id": "e2", "source": "transform", "target": "email"}
+  ]
+}

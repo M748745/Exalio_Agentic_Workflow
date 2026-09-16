@@ -1,0 +1,129 @@
+{
+  "id": "rag_qa_demo_002",
+  "name": "RAG Q&A System",
+  "description": "Retrieval-Augmented Generation system. Stores documents in vector DB, searches for relevant context, and generates informed answers using LLM.",
+  "category": "AI & Knowledge",
+  "difficulty": "Intermediate",
+  "tags": ["rag", "vector", "semantic-search", "llm", "qa"],
+  "author": "Agentic Workflow Builder",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "doc_input",
+      "type": "text_input",
+      "data": {
+        "label": "Knowledge Base (Documents)",
+        "nodeType": "text_input",
+        "category": "Input"
+      },
+      "position": { "x": 100, "y": 100 }
+    },
+    {
+      "id": "vector_store_1",
+      "type": "vector_store",
+      "data": {
+        "label": "Store in Vector DB",
+        "nodeType": "vector_store",
+        "category": "Memory",
+        "config": {
+          "collection": "knowledge_base",
+          "text": "{{doc_input.text}}",
+          "metadata": {
+            "source": "user_upload",
+            "timestamp": "{{timestamp}}"
+          }
+        }
+      },
+      "position": { "x": 300, "y": 100 }
+    },
+    {
+      "id": "question_input",
+      "type": "text_input",
+      "data": {
+        "label": "Ask Question",
+        "nodeType": "text_input",
+        "category": "Input"
+      },
+      "position": { "x": 100, "y": 300 }
+    },
+    {
+      "id": "vector_search_1",
+      "type": "vector_search",
+      "data": {
+        "label": "Search Relevant Context",
+        "nodeType": "vector_search",
+        "category": "Memory",
+        "config": {
+          "collection": "knowledge_base",
+          "query": "{{question_input.text}}",
+          "nResults": 3
+        }
+      },
+      "position": { "x": 300, "y": 300 }
+    },
+    {
+      "id": "ollama_qa",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Generate Answer",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a helpful assistant. Answer the question based ONLY on the provided context. If the context doesn't contain the answer, say 'I don't have enough information to answer that.'",
+          "temperature": 0.3,
+          "maxTokens": 500
+        }
+      },
+      "position": { "x": 500, "y": 300 }
+    },
+    {
+      "id": "output_answer",
+      "type": "display",
+      "data": {
+        "label": "Display Answer",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "Question: {{question_input.text}}\n\nAnswer: {{ollama_qa.response}}\n\nSources: {{vector_search_1.results}}"
+        }
+      },
+      "position": { "x": 700, "y": 300 }
+    },
+    {
+      "id": "store_status",
+      "type": "display",
+      "data": {
+        "label": "Storage Confirmation",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "✅ Documents stored in vector DB: {{vector_store_1.count}} items"
+        }
+      },
+      "position": { "x": 500, "y": 100 }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "doc_input", "target": "vector_store_1" },
+    { "id": "e2", "source": "vector_store_1", "target": "store_status" },
+    { "id": "e3", "source": "question_input", "target": "vector_search_1" },
+    { "id": "e4", "source": "vector_search_1", "target": "ollama_qa" },
+    { "id": "e5", "source": "ollama_qa", "target": "output_answer" }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-12",
+    "estimatedRuntime": "3-8 seconds per query",
+    "requirements": [
+      "ChromaDB (vector database)",
+      "Ollama with llama3.2:3b model"
+    ],
+    "useCases": [
+      "Document Q&A systems",
+      "Internal knowledge bases",
+      "Customer support automation",
+      "Research assistance"
+    ],
+    "notes": "Upload documents first (top path), then ask questions (bottom path). The system searches for relevant context and generates answers."
+  }
+}

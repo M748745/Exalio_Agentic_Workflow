@@ -1,0 +1,360 @@
+{
+  "id": "multi_agent_support_006",
+  "name": "Multi-Agent Customer Support System",
+  "description": "Advanced multi-agent system demonstrating specialized agents working together. Features a classifier agent that routes inquiries to specialized agents (Technical, Billing, General), with memory sharing and parallel processing.",
+  "category": "Multi-Agent Systems",
+  "difficulty": "Advanced",
+  "tags": ["multi-agent", "routing", "classification", "customer-support", "collaboration"],
+  "author": "Agentic Workflow Builder",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "input_query",
+      "type": "text_input",
+      "data": {
+        "label": "Customer Query",
+        "nodeType": "text_input",
+        "category": "Input",
+        "config": {
+          "placeholder": "Enter customer support question..."
+        }
+      },
+      "position": { "x": 100, "y": 300 }
+    },
+    {
+      "id": "context_store",
+      "type": "context_append",
+      "data": {
+        "label": "Store Query Context",
+        "nodeType": "context_append",
+        "category": "Memory",
+        "config": {
+          "contextId": "support_session",
+          "message": "Customer Query: {{input_query.text}}"
+        }
+      },
+      "position": { "x": 300, "y": 300 }
+    },
+    {
+      "id": "classifier_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Classifier Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a classification agent. Analyze the customer query and classify it into one of these categories:\n- TECHNICAL: Issues with product functionality, bugs, errors\n- BILLING: Payment, subscription, pricing questions\n- GENERAL: General inquiries, information requests\n\nRespond with ONLY the category name (TECHNICAL, BILLING, or GENERAL).",
+          "temperature": 0.1,
+          "maxTokens": 50
+        }
+      },
+      "position": { "x": 500, "y": 300 }
+    },
+    {
+      "id": "cache_classification",
+      "type": "cache_set",
+      "data": {
+        "label": "Cache Classification",
+        "nodeType": "cache_set",
+        "category": "Memory",
+        "config": {
+          "key": "classification_{{timestamp}}",
+          "value": "{{classifier_agent.response}}",
+          "ttl": 1800
+        }
+      },
+      "position": { "x": 700, "y": 300 }
+    },
+    {
+      "id": "route_technical",
+      "type": "if_else",
+      "data": {
+        "label": "Technical?",
+        "nodeType": "if_else",
+        "category": "Control Flow",
+        "config": {
+          "condition": "classifier_agent.response.includes('TECHNICAL')"
+        }
+      },
+      "position": { "x": 900, "y": 150 }
+    },
+    {
+      "id": "route_billing",
+      "type": "if_else",
+      "data": {
+        "label": "Billing?",
+        "nodeType": "if_else",
+        "category": "Control Flow",
+        "config": {
+          "condition": "classifier_agent.response.includes('BILLING')"
+        }
+      },
+      "position": { "x": 900, "y": 300 }
+    },
+    {
+      "id": "technical_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Technical Support Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a technical support specialist. Provide detailed technical solutions including:\n- Step-by-step troubleshooting\n- Error diagnosis\n- Configuration guidance\n- Best practices\n\nBe precise and technical in your responses.",
+          "temperature": 0.3,
+          "maxTokens": 500
+        }
+      },
+      "position": { "x": 1100, "y": 100 }
+    },
+    {
+      "id": "billing_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Billing Support Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a billing and subscription specialist. Help with:\n- Payment processing questions\n- Subscription management\n- Pricing inquiries\n- Invoice questions\n\nBe clear about pricing and payment options.",
+          "temperature": 0.3,
+          "maxTokens": 500
+        }
+      },
+      "position": { "x": 1100, "y": 300 }
+    },
+    {
+      "id": "general_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "General Support Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a general customer support agent. Provide friendly, helpful responses for:\n- Product information\n- General questions\n- Feature explanations\n- Getting started guides\n\nBe warm and approachable.",
+          "temperature": 0.5,
+          "maxTokens": 500
+        }
+      },
+      "position": { "x": 1100, "y": 500 }
+    },
+    {
+      "id": "store_technical_response",
+      "type": "context_append",
+      "data": {
+        "label": "Store Technical Response",
+        "nodeType": "context_append",
+        "category": "Memory",
+        "config": {
+          "contextId": "support_session",
+          "message": "Technical Agent: {{technical_agent.response}}"
+        }
+      },
+      "position": { "x": 1300, "y": 100 }
+    },
+    {
+      "id": "store_billing_response",
+      "type": "context_append",
+      "data": {
+        "label": "Store Billing Response",
+        "nodeType": "context_append",
+        "category": "Memory",
+        "config": {
+          "contextId": "support_session",
+          "message": "Billing Agent: {{billing_agent.response}}"
+        }
+      },
+      "position": { "x": 1300, "y": 300 }
+    },
+    {
+      "id": "store_general_response",
+      "type": "context_append",
+      "data": {
+        "label": "Store General Response",
+        "nodeType": "context_append",
+        "category": "Memory",
+        "config": {
+          "contextId": "support_session",
+          "message": "General Agent: {{general_agent.response}}"
+        }
+      },
+      "position": { "x": 1300, "y": 500 }
+    },
+    {
+      "id": "quality_check_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Quality Assurance Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a quality assurance agent. Review the support response and:\n- Verify it addresses the customer's question\n- Check for completeness\n- Ensure professional tone\n- Add any missing critical information\n\nProvide a PASS/IMPROVE rating and brief feedback.",
+          "temperature": 0.2,
+          "maxTokens": 300
+        }
+      },
+      "position": { "x": 1500, "y": 300 }
+    },
+    {
+      "id": "needs_escalation",
+      "type": "if_else",
+      "data": {
+        "label": "Needs Escalation?",
+        "nodeType": "if_else",
+        "category": "Control Flow",
+        "config": {
+          "condition": "quality_check_agent.response.includes('IMPROVE')"
+        }
+      },
+      "position": { "x": 1700, "y": 300 }
+    },
+    {
+      "id": "escalation_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Escalation Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a senior support specialist handling escalated cases. Review all previous responses and provide:\n- Enhanced solution with more detail\n- Alternative approaches\n- Additional resources\n- When to contact human support\n\nProvide the most comprehensive response possible.",
+          "temperature": 0.4,
+          "maxTokens": 700
+        }
+      },
+      "position": { "x": 1900, "y": 200 }
+    },
+    {
+      "id": "get_full_context",
+      "type": "context_get",
+      "data": {
+        "label": "Get Full Context",
+        "nodeType": "context_get",
+        "category": "Memory",
+        "config": {
+          "contextId": "support_session"
+        }
+      },
+      "position": { "x": 2100, "y": 300 }
+    },
+    {
+      "id": "sentiment_agent",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Sentiment Analysis Agent",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "Analyze the customer query sentiment. Categorize as:\n- URGENT: Frustrated, angry, or time-sensitive\n- NORMAL: Neutral, informational\n- POSITIVE: Happy, satisfied\n\nProvide the category and confidence score (0-100).",
+          "temperature": 0.1,
+          "maxTokens": 100
+        }
+      },
+      "position": { "x": 500, "y": 500 }
+    },
+    {
+      "id": "vector_store_query",
+      "type": "vector_store",
+      "data": {
+        "label": "Store Query in Vector DB",
+        "nodeType": "vector_store",
+        "category": "Memory",
+        "config": {
+          "collectionName": "support_queries",
+          "text": "{{input_query.text}}",
+          "metadata": {
+            "classification": "{{classifier_agent.response}}",
+            "sentiment": "{{sentiment_agent.response}}",
+            "timestamp": "{{timestamp}}"
+          }
+        }
+      },
+      "position": { "x": 700, "y": 500 }
+    },
+    {
+      "id": "similar_queries",
+      "type": "vector_search",
+      "data": {
+        "label": "Find Similar Past Queries",
+        "nodeType": "vector_search",
+        "category": "Memory",
+        "config": {
+          "collectionName": "support_queries",
+          "queryText": "{{input_query.text}}",
+          "topK": 3
+        }
+      },
+      "position": { "x": 900, "y": 500 }
+    },
+    {
+      "id": "final_response",
+      "type": "display",
+      "data": {
+        "label": "Final Response",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "SUPPORT TICKET SUMMARY\n\nClassification: {{classifier_agent.response}}\nSentiment: {{sentiment_agent.response}}\n\nAgent Response: {{quality_check_agent.response}}\n\nFull Context Available: {{get_full_context.messages.length}} messages\nSimilar Past Queries: {{similar_queries.results.length}} found"
+        }
+      },
+      "position": { "x": 2300, "y": 300 }
+    }
+  ],
+  "edges": [
+    { "source": "input_query", "target": "context_store" },
+    { "source": "context_store", "target": "classifier_agent" },
+    { "source": "context_store", "target": "sentiment_agent" },
+    { "source": "classifier_agent", "target": "cache_classification" },
+    { "source": "cache_classification", "target": "route_technical" },
+    { "source": "cache_classification", "target": "route_billing" },
+    { "source": "route_technical", "target": "technical_agent", "targetHandle": "true" },
+    { "source": "route_billing", "target": "billing_agent", "targetHandle": "true" },
+    { "source": "route_billing", "target": "general_agent", "targetHandle": "false" },
+    { "source": "technical_agent", "target": "store_technical_response" },
+    { "source": "billing_agent", "target": "store_billing_response" },
+    { "source": "general_agent", "target": "store_general_response" },
+    { "source": "store_technical_response", "target": "quality_check_agent" },
+    { "source": "store_billing_response", "target": "quality_check_agent" },
+    { "source": "store_general_response", "target": "quality_check_agent" },
+    { "source": "quality_check_agent", "target": "needs_escalation" },
+    { "source": "needs_escalation", "target": "escalation_agent", "targetHandle": "true" },
+    { "source": "needs_escalation", "target": "get_full_context", "targetHandle": "false" },
+    { "source": "escalation_agent", "target": "get_full_context" },
+    { "source": "sentiment_agent", "target": "vector_store_query" },
+    { "source": "vector_store_query", "target": "similar_queries" },
+    { "source": "get_full_context", "target": "final_response" },
+    { "source": "similar_queries", "target": "final_response" }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-13T00:00:00Z",
+    "estimatedExecutionTime": "15-30 seconds",
+    "requiredServices": ["Ollama", "ChromaDB"],
+    "useCases": [
+      "Customer support automation",
+      "Intelligent ticket routing",
+      "Multi-agent collaboration",
+      "Quality assurance workflows"
+    ],
+    "keyFeatures": [
+      "7 specialized AI agents",
+      "Intelligent routing based on classification",
+      "Parallel sentiment analysis",
+      "Quality assurance validation",
+      "Automatic escalation logic",
+      "Vector similarity search for past queries",
+      "Comprehensive context management",
+      "Memory sharing across agents"
+    ],
+    "learningObjectives": [
+      "Multi-agent system design",
+      "Conditional workflow routing",
+      "Memory and context management",
+      "Quality control in AI systems",
+      "Parallel processing patterns"
+    ]
+  }
+}

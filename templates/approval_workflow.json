@@ -1,0 +1,46 @@
+{
+  "name": "Approval Workflow Template",
+  "description": "Human approval workflow with notifications",
+  "category": "hitl",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "trigger",
+      "name": "Workflow Start",
+      "config": {},
+      "next_nodes": ["prepare"]
+    },
+    {
+      "id": "prepare",
+      "type": "data_transform",
+      "name": "Prepare Request",
+      "config": {},
+      "next_nodes": ["approval"]
+    },
+    {
+      "id": "approval",
+      "type": "hitl_approval",
+      "name": "Human Approval",
+      "config": {
+        "task_type": "approval",
+        "prompt": "Please review and approve this request",
+        "timeout_hours": 24
+      },
+      "next_nodes": ["approved_action"]
+    },
+    {
+      "id": "approved_action",
+      "type": "email_agent",
+      "name": "Send Approval Email",
+      "config": {
+        "subject": "Request Approved"
+      },
+      "next_nodes": []
+    }
+  ],
+  "edges": [
+    {"id": "e1", "source": "start", "target": "prepare"},
+    {"id": "e2", "source": "prepare", "target": "approval"},
+    {"id": "e3", "source": "approval", "target": "approved_action"}
+  ]
+}

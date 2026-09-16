@@ -1,0 +1,49 @@
+{
+  "name": "Daily Report Generation",
+  "description": "Generate and email daily reports from database",
+  "category": "reports",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "trigger",
+      "name": "Daily Trigger (9am)",
+      "config": {},
+      "next_nodes": ["query"]
+    },
+    {
+      "id": "query",
+      "type": "database_agent",
+      "name": "Query Database",
+      "config": {
+        "query": "SELECT * FROM sales WHERE date = CURRENT_DATE",
+        "db_type": "postgresql"
+      },
+      "next_nodes": ["analyze"]
+    },
+    {
+      "id": "analyze",
+      "type": "llm_query",
+      "name": "Analyze Data",
+      "config": {
+        "model": "llama3.2:3b",
+        "prompt": "Analyze the sales data and provide insights"
+      },
+      "next_nodes": ["email"]
+    },
+    {
+      "id": "email",
+      "type": "email_agent",
+      "name": "Send Report",
+      "config": {
+        "to_email": "team@company.com",
+        "subject": "Daily Sales Report"
+      },
+      "next_nodes": []
+    }
+  ],
+  "edges": [
+    {"id": "e1", "source": "start", "target": "query"},
+    {"id": "e2", "source": "query", "target": "analyze"},
+    {"id": "e3", "source": "analyze", "target": "email"}
+  ]
+}

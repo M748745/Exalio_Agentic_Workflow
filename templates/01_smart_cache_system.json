@@ -1,0 +1,123 @@
+{
+  "id": "smart_cache_demo_001",
+  "name": "Smart Cache System",
+  "description": "Demonstrates intelligent caching with cache_get, cache_set, and conditional logic. Checks cache first, computes on miss, and stores result.",
+  "category": "Memory & Caching",
+  "difficulty": "Beginner",
+  "tags": ["cache", "memory", "performance", "optimization"],
+  "author": "Agentic Workflow Builder",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "input_1",
+      "type": "text_input",
+      "data": {
+        "label": "Enter search query",
+        "nodeType": "text_input",
+        "category": "Input"
+      },
+      "position": { "x": 100, "y": 100 }
+    },
+    {
+      "id": "cache_get_1",
+      "type": "cache_get",
+      "data": {
+        "label": "Check Cache",
+        "nodeType": "cache_get",
+        "category": "Memory",
+        "config": {
+          "key": "{{input_1.text}}"
+        }
+      },
+      "position": { "x": 300, "y": 100 }
+    },
+    {
+      "id": "if_1",
+      "type": "if_else",
+      "data": {
+        "label": "Cache Hit?",
+        "nodeType": "if_else",
+        "category": "Control Flow",
+        "config": {
+          "condition": "cache_get_1.success === true"
+        }
+      },
+      "position": { "x": 500, "y": 100 }
+    },
+    {
+      "id": "ollama_1",
+      "type": "ollama_llm",
+      "data": {
+        "label": "Generate Response (Cache Miss)",
+        "nodeType": "ollama_llm",
+        "category": "LLM Providers",
+        "config": {
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a helpful assistant. Answer concisely.",
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "position": { "x": 700, "y": 200 }
+    },
+    {
+      "id": "cache_set_1",
+      "type": "cache_set",
+      "data": {
+        "label": "Store in Cache",
+        "nodeType": "cache_set",
+        "category": "Memory",
+        "config": {
+          "key": "{{input_1.text}}",
+          "value": "{{ollama_1.response}}",
+          "ttl": 3600
+        }
+      },
+      "position": { "x": 900, "y": 200 }
+    },
+    {
+      "id": "output_cached",
+      "type": "display",
+      "data": {
+        "label": "Display (From Cache)",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "✅ Cached Result: {{cache_get_1.value}}"
+        }
+      },
+      "position": { "x": 700, "y": 50 }
+    },
+    {
+      "id": "output_fresh",
+      "type": "display",
+      "data": {
+        "label": "Display (Fresh Result)",
+        "nodeType": "display",
+        "category": "Output",
+        "config": {
+          "message": "🔄 Fresh Result (cached for 1hr): {{ollama_1.response}}"
+        }
+      },
+      "position": { "x": 1100, "y": 200 }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "input_1", "target": "cache_get_1" },
+    { "id": "e2", "source": "cache_get_1", "target": "if_1" },
+    { "id": "e3", "source": "if_1", "target": "output_cached", "sourceHandle": "true" },
+    { "id": "e4", "source": "if_1", "target": "ollama_1", "sourceHandle": "false" },
+    { "id": "e5", "source": "ollama_1", "target": "cache_set_1" },
+    { "id": "e6", "source": "cache_set_1", "target": "output_fresh" }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-12",
+    "estimatedRuntime": "< 5 seconds (cached) | 2-10 seconds (fresh)",
+    "requirements": ["Ollama with llama3.2:3b model"],
+    "useCases": [
+      "API response caching",
+      "Expensive computation optimization",
+      "Rate limiting with cached results"
+    ]
+  }
+}
