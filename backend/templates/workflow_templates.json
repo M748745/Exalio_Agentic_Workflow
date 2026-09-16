@@ -1,0 +1,451 @@
+[
+  {
+    "id": "template_email_notification",
+    "name": "Email Notification Workflow",
+    "description": "Simple workflow to send email notifications when triggered",
+    "category": "Communication",
+    "tags": ["email", "notification", "basic"],
+    "difficulty": "beginner",
+    "use_cases": ["Alerts", "Notifications", "Reports"],
+    "nodes": [
+      {
+        "id": "input_1",
+        "type": "input",
+        "position": {"x": 100, "y": 200},
+        "data": {
+          "label": "Trigger Data",
+          "nodeType": "input",
+          "category": "Input",
+          "inputType": "json",
+          "description": "Input data for the email"
+        }
+      },
+      {
+        "id": "email_1",
+        "type": "custom",
+        "position": {"x": 400, "y": 200},
+        "data": {
+          "label": "Send Email",
+          "nodeType": "email_node",
+          "category": "Integration & Connectivity",
+          "provider": "gmail",
+          "subject": "Workflow Notification",
+          "body": "Your workflow has been triggered with the following data: {{input_data}}",
+          "html": "false",
+          "description": "Sends email notification"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "input_1",
+        "target": "email_1",
+        "type": "smoothstep"
+      }
+    ]
+  },
+  {
+    "id": "template_data_pipeline",
+    "name": "Data Processing Pipeline",
+    "description": "Load data from database, transform it, and save results",
+    "category": "Data Processing",
+    "tags": ["database", "transformation", "etl"],
+    "difficulty": "intermediate",
+    "use_cases": ["ETL", "Data Migration", "Reporting"],
+    "nodes": [
+      {
+        "id": "db_load_1",
+        "type": "custom",
+        "position": {"x": 100, "y": 200},
+        "data": {
+          "label": "Load from Database",
+          "nodeType": "mysql",
+          "category": "Data Loaders",
+          "host": "localhost",
+          "port": 3306,
+          "query": "SELECT * FROM users WHERE active = 1",
+          "description": "Loads data from MySQL"
+        }
+      },
+      {
+        "id": "transform_1",
+        "type": "custom",
+        "position": {"x": 400, "y": 200},
+        "data": {
+          "label": "Transform Data",
+          "nodeType": "python_script",
+          "category": "Data Transformation",
+          "pythonScript": "def transform(data):\n    # Transform your data here\n    return data",
+          "description": "Transforms the data"
+        }
+      },
+      {
+        "id": "output_1",
+        "type": "output",
+        "position": {"x": 700, "y": 200},
+        "data": {
+          "label": "Save Results",
+          "nodeType": "output",
+          "category": "Output",
+          "outputFormat": "json",
+          "destination": "output/results.json",
+          "description": "Saves processed data"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "db_load_1",
+        "target": "transform_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e2",
+        "source": "transform_1",
+        "target": "output_1",
+        "type": "smoothstep"
+      }
+    ]
+  },
+  {
+    "id": "template_llm_chatbot",
+    "name": "AI Chatbot with Context",
+    "description": "Chatbot workflow with conversation context and vector search",
+    "category": "AI & LLM",
+    "tags": ["llm", "chatbot", "rag", "context"],
+    "difficulty": "advanced",
+    "use_cases": ["Customer Support", "Q&A Bot", "Documentation Assistant"],
+    "nodes": [
+      {
+        "id": "input_1",
+        "type": "input",
+        "position": {"x": 100, "y": 200},
+        "data": {
+          "label": "User Message",
+          "nodeType": "input",
+          "category": "Input",
+          "inputType": "text",
+          "description": "User's question or message"
+        }
+      },
+      {
+        "id": "vector_search_1",
+        "type": "custom",
+        "position": {"x": 350, "y": 100},
+        "data": {
+          "label": "Search Knowledge Base",
+          "nodeType": "vector_search",
+          "category": "Memory",
+          "collection": "knowledge_base",
+          "nResults": 3,
+          "description": "Retrieves relevant context"
+        }
+      },
+      {
+        "id": "context_get_1",
+        "type": "custom",
+        "position": {"x": 350, "y": 300},
+        "data": {
+          "label": "Get Conversation History",
+          "nodeType": "context_get",
+          "category": "Memory",
+          "contextId": "default",
+          "lastN": 5,
+          "description": "Gets recent messages"
+        }
+      },
+      {
+        "id": "llm_1",
+        "type": "custom",
+        "position": {"x": 650, "y": 200},
+        "data": {
+          "label": "Generate Response",
+          "nodeType": "ollama_llm",
+          "category": "LLM Providers",
+          "model": "llama3.2:3b",
+          "systemPrompt": "You are a helpful assistant. Use the provided context to answer questions accurately.",
+          "temperature": 0.7,
+          "maxTokens": 2000,
+          "description": "Generates AI response"
+        }
+      },
+      {
+        "id": "context_append_1",
+        "type": "custom",
+        "position": {"x": 950, "y": 200},
+        "data": {
+          "label": "Save to History",
+          "nodeType": "context_append",
+          "category": "Memory",
+          "contextId": "default",
+          "role": "assistant",
+          "description": "Saves response to history"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "input_1",
+        "target": "vector_search_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e2",
+        "source": "input_1",
+        "target": "context_get_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e3",
+        "source": "vector_search_1",
+        "target": "llm_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e4",
+        "source": "context_get_1",
+        "target": "llm_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e5",
+        "source": "llm_1",
+        "target": "context_append_1",
+        "type": "smoothstep"
+      }
+    ]
+  },
+  {
+    "id": "template_api_monitor",
+    "name": "API Monitoring & Alerts",
+    "description": "Monitor API endpoint and send alerts if it fails",
+    "category": "Monitoring",
+    "tags": ["api", "monitoring", "alerts", "slack"],
+    "difficulty": "intermediate",
+    "use_cases": ["Health Checks", "Uptime Monitoring", "SLA Tracking"],
+    "nodes": [
+      {
+        "id": "api_1",
+        "type": "custom",
+        "position": {"x": 100, "y": 200},
+        "data": {
+          "label": "Check API Health",
+          "nodeType": "api_integration",
+          "category": "API Integration",
+          "apiUrl": "https://api.example.com/health",
+          "method": "GET",
+          "enableRetry": "true",
+          "maxRetries": 3,
+          "description": "Checks API status"
+        }
+      },
+      {
+        "id": "condition_1",
+        "type": "custom",
+        "position": {"x": 400, "y": 200},
+        "data": {
+          "label": "Check Status",
+          "nodeType": "if_else",
+          "category": "Control Flow",
+          "condition": "data.status_code >= 400",
+          "description": "Checks if API failed"
+        }
+      },
+      {
+        "id": "slack_1",
+        "type": "custom",
+        "position": {"x": 700, "y": 100},
+        "data": {
+          "label": "Send Alert",
+          "nodeType": "slack_node",
+          "category": "Integration & Connectivity",
+          "method": "webhook",
+          "message": "⚠️ API Health Check Failed!\\nStatus: {{status_code}}\\nError: {{error}}",
+          "username": "Monitor Bot",
+          "icon_emoji": ":warning:",
+          "description": "Sends Slack alert"
+        }
+      },
+      {
+        "id": "cache_1",
+        "type": "custom",
+        "position": {"x": 700, "y": 300},
+        "data": {
+          "label": "Log Success",
+          "nodeType": "cache_set",
+          "category": "Memory",
+          "key": "last_success",
+          "ttl": 3600,
+          "description": "Caches last success time"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "api_1",
+        "target": "condition_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e2",
+        "source": "condition_1",
+        "target": "slack_1",
+        "type": "smoothstep",
+        "label": "Failed"
+      },
+      {
+        "id": "e3",
+        "source": "condition_1",
+        "target": "cache_1",
+        "type": "smoothstep",
+        "label": "Success"
+      }
+    ]
+  },
+  {
+    "id": "template_document_qa",
+    "name": "Document Q&A System",
+    "description": "Upload documents, store in vector DB, and answer questions",
+    "category": "AI & LLM",
+    "tags": ["rag", "documents", "qa", "embeddings"],
+    "difficulty": "advanced",
+    "use_cases": ["Document Search", "Knowledge Base", "Research Assistant"],
+    "nodes": [
+      {
+        "id": "input_1",
+        "type": "input",
+        "position": {"x": 100, "y": 200},
+        "data": {
+          "label": "Document Input",
+          "nodeType": "input",
+          "category": "Input",
+          "inputType": "file",
+          "description": "Upload document"
+        }
+      },
+      {
+        "id": "parser_1",
+        "type": "custom",
+        "position": {"x": 350, "y": 200},
+        "data": {
+          "label": "Parse Document",
+          "nodeType": "universal_parser",
+          "category": "File Parsers",
+          "inputFormat": "auto",
+          "outputFormat": "text",
+          "description": "Extracts text from document"
+        }
+      },
+      {
+        "id": "vector_store_1",
+        "type": "custom",
+        "position": {"x": 600, "y": 200},
+        "data": {
+          "label": "Store Embeddings",
+          "nodeType": "vector_store",
+          "category": "Memory",
+          "collection": "documents",
+          "description": "Stores in vector database"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "input_1",
+        "target": "parser_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e2",
+        "source": "parser_1",
+        "target": "vector_store_1",
+        "type": "smoothstep"
+      }
+    ]
+  },
+  {
+    "id": "template_scheduled_report",
+    "name": "Scheduled Database Report",
+    "description": "Generate and email daily reports from database",
+    "category": "Reporting",
+    "tags": ["scheduled", "reporting", "database", "email"],
+    "difficulty": "intermediate",
+    "use_cases": ["Daily Reports", "Analytics", "Dashboards"],
+    "nodes": [
+      {
+        "id": "schedule_1",
+        "type": "custom",
+        "position": {"x": 100, "y": 200},
+        "data": {
+          "label": "Daily Trigger",
+          "nodeType": "cron_scheduler",
+          "category": "Scheduling & Triggers",
+          "schedule": "0 9 * * *",
+          "description": "Runs daily at 9 AM"
+        }
+      },
+      {
+        "id": "db_1",
+        "type": "custom",
+        "position": {"x": 350, "y": 200},
+        "data": {
+          "label": "Fetch Data",
+          "nodeType": "postgresql",
+          "category": "Data Loaders",
+          "query": "SELECT * FROM sales WHERE date = CURRENT_DATE - 1",
+          "description": "Gets yesterday's data"
+        }
+      },
+      {
+        "id": "transform_1",
+        "type": "custom",
+        "position": {"x": 600, "y": 200},
+        "data": {
+          "label": "Format Report",
+          "nodeType": "python_script",
+          "category": "Data Transformation",
+          "pythonScript": "def transform(data):\n    # Format data as HTML table\n    return data",
+          "description": "Formats as HTML"
+        }
+      },
+      {
+        "id": "email_1",
+        "type": "custom",
+        "position": {"x": 850, "y": 200},
+        "data": {
+          "label": "Email Report",
+          "nodeType": "email_node",
+          "category": "Integration & Connectivity",
+          "subject": "Daily Sales Report - {{date}}",
+          "html": "true",
+          "description": "Sends formatted report"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "schedule_1",
+        "target": "db_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e2",
+        "source": "db_1",
+        "target": "transform_1",
+        "type": "smoothstep"
+      },
+      {
+        "id": "e3",
+        "source": "transform_1",
+        "target": "email_1",
+        "type": "smoothstep"
+      }
+    ]
+  }
+]
