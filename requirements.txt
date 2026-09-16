@@ -1,0 +1,103 @@
+# Core Framework
+flask==3.0.0
+flask-cors==4.0.0
+gunicorn==21.2.0
+streamlit==1.31.0
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Workflow & Agent Framework
+langchain==0.1.0
+langgraph==0.0.20
+langchain-community==0.0.12
+
+# Ollama (Local LLM)
+requests==2.31.0
+httpx==0.26.0
+
+# Local Embeddings & Vector Store
+sentence-transformers==2.3.1
+transformers==4.36.2
+torch==2.1.2
+chromadb==0.4.22
+faiss-cpu==1.7.4
+hnswlib==0.8.0
+
+# OCR - Offline Solutions
+paddleocr==2.7.0
+easyocr==1.7.1
+pytesseract==0.3.10
+pdf2image==1.17.0
+Pillow==10.2.0
+opencv-python==4.9.0.80
+
+# Document Processing
+python-docx==1.1.0
+pypdf==3.17.4
+python-pptx==0.6.23
+openpyxl==3.1.2
+markdown==3.5.2
+
+# Database
+sqlalchemy==2.0.25
+asyncpg==0.29.0
+alembic==1.13.1
+
+# NLP Processing (Offline)
+spacy==3.7.2
+nltk==3.8.1
+scikit-learn==1.4.0
+
+# Arabic Text Support
+arabic-reshaper==3.0.0
+python-bidi==0.4.2
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+cryptography==42.0.0
+
+# Background Tasks
+celery==5.3.4
+redis==5.0.1
+
+# Data Processing
+pandas==2.2.0
+numpy==1.26.3
+scipy==1.12.0
+
+# Visualization (for monitoring)
+plotly==5.18.0
+
+# Voice Integration (AI Planet Feature)
+faster-whisper==0.10.0
+soundfile==0.12.1
+librosa==0.10.1
+noisereduce==3.0.0
+# Optional: For speaker diarization
+# pyannote-audio==3.1.0  # Requires HuggingFace token
+
+# Chat-with-Data (AI Planet Feature)
+sqlparse==0.4.4
+pymysql==1.1.0
+psycopg2-binary==2.9.9
+pymongo==4.6.1
+
+# LLM Providers (AI Planet Feature - 300k+ models)
+openai==1.10.0
+anthropic==0.18.1
+cohere==4.47
+
+# Additional AI Planet Features
+deepmultilingualpunctuation==0.1.0  # Punctuation restoration
+beautifulsoup4==4.12.3  # HTML parsing
+lxml==5.1.0  # XML parsing
+
+# Utilities
+python-dotenv==1.0.0
+aiofiles==23.2.1
+pyyaml==6.0.1
+jsonschema==4.21.0
