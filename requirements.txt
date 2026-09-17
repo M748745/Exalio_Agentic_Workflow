@@ -1,37 +1,38 @@
-# Core Framework
+# Core Framework (Flask is primary, others optional)
 flask==3.0.0
 flask-cors==4.0.0
 gunicorn==21.2.0
-streamlit==1.31.0
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
+# streamlit==1.31.0  # Not needed for Flask deployment
+# fastapi==0.109.0  # Not needed for Flask deployment
+# uvicorn[standard]==0.27.0  # Not needed for Flask deployment
 pydantic==2.5.3
 pydantic-settings==2.1.0
 
 # Workflow & Agent Framework
-langchain==0.1.0
-langgraph==0.0.20
-langchain-community==0.0.12
+langchain>=0.1.0
+langgraph>=0.0.20
+langchain-community>=0.0.12
 
 # Ollama (Local LLM)
 requests==2.31.0
 httpx==0.26.0
 
-# Local Embeddings & Vector Store
-sentence-transformers==2.3.1
-transformers==4.36.2
-torch==2.1.2
-chromadb==0.4.22
-faiss-cpu==1.7.4
-hnswlib==0.8.0
+# Local Embeddings & Vector Store (lighter versions for Railway)
+sentence-transformers>=2.3.0
+transformers>=4.36.0
+torch>=2.2.0
+chromadb>=0.4.0
+faiss-cpu>=1.7.0
+hnswlib>=0.8.0
 
-# OCR - Offline Solutions
-paddleocr==2.7.0
-easyocr==1.7.1
-pytesseract==0.3.10
-pdf2image==1.17.0
-Pillow==10.2.0
-opencv-python==4.9.0.80
+# OCR - Offline Solutions (optional - commented out for Railway deployment)
+# Uncomment if you need OCR features (adds ~2GB to deployment)
+# paddleocr==2.7.0
+# easyocr==1.7.1
+# pytesseract==0.3.10
+# pdf2image==1.17.0
+Pillow>=10.0.0
+# opencv-python==4.9.0.80
 
 # Document Processing
 python-docx==1.1.0
@@ -72,11 +73,12 @@ scipy==1.12.0
 # Visualization (for monitoring)
 plotly==5.18.0
 
-# Voice Integration (AI Planet Feature)
-faster-whisper==0.10.0
-soundfile==0.12.1
-librosa==0.10.1
-noisereduce==3.0.0
+# Voice Integration (AI Planet Feature) - Heavy dependencies
+# Uncomment if you need voice processing (adds ~500MB to deployment)
+# faster-whisper==0.10.0
+# soundfile==0.12.1
+# librosa==0.10.1
+# noisereduce==3.0.0
 # Optional: For speaker diarization
 # pyannote-audio==3.1.0  # Requires HuggingFace token
 
