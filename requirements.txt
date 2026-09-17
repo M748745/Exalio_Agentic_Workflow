@@ -94,7 +94,7 @@ anthropic==0.18.1
 cohere==4.47
 
 # Additional AI Planet Features
-deepmultilingualpunctuation==0.1.0  # Punctuation restoration
+deepmultilingualpunctuation==1.0.1  # Punctuation restoration
 beautifulsoup4==4.12.3  # HTML parsing
 lxml==5.1.0  # XML parsing
 
